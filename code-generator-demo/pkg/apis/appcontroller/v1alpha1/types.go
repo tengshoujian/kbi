@@ -1,11 +1,13 @@
 package v1alpha1
 
-//+genclient
-//+k8s:deepcopy-gen:interface=k8s.io/apimachinery/pkg/runtime.Object
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type Application struct {
-	metav1.ObjecMeta `json:"metadata,omitempty"`
-	metav1.TypeMeta  `json:",inline"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   ApplicationSpec   `json:"spec"`
 	Status ApplicationStatus `json:"status"`
@@ -20,7 +22,7 @@ type ApplicationStatus struct {
 	AvailableReplicas int32 `json:"availableReplicas"`
 }
 
-//+k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type ApplicationList struct {
 	metav1.TypeMeta `json:",inline"`
