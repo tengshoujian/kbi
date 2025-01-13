@@ -9,4 +9,6 @@ metadata:
     app.kubernetes.io/created-by: kubebuilder-demo
   name: guestbook-sample
 spec:
-  # TODO(user): Add fields here
+  size: 1
+  configMapName: cm-test
+  alias: Phone
