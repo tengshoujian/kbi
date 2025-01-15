@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
-
+	"fmt"
+	"io"
+	"net/http"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -13,6 +16,7 @@ import (
 func createPod() error {
 	pod := createPodObject()
 	serializer := getJSONSerializer()
+	postBoday,
 
 }
 
@@ -33,6 +37,34 @@ func createPodObject() *corev1.Pod {
 		"app.kubernetes.io/name":     "a-name",
 	})
 	return &pod
+}
+func serializePodObject(serializer runtime.Serializer, pod *corev1.Pod,)(io.Reader,error){
+	var buf bytes.Buffer
+	err := serializer.Encode(pod,&buf)
+	if err != nil {
+		return nil,err
+	}
+	return &buf, nil
+}
+
+func buildPostRequest(body io.Reader)(*http.Request,error,){
+	reqCreate, err :=http.NewRequest(
+		"POST",
+		"http://172.0.0.1:8001/api/v1/namespaces/default/pods",
+		body,
+	)
+	if err != nil {
+		return nil, err
+	}
+	reqCreate.Header.Add(
+		"Accept",
+		"application/json",
+	)
+	reqCreate.Header.Add(
+		"Content-Type",
+		"application/json",
+	)
+	return reqCreate,nil
 }
 
 func getJSONSerializer() runtime.Serializer {
