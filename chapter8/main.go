@@ -16,8 +16,37 @@ import (
 func createPod() error {
 	pod := createPodObject()
 	serializer := getJSONSerializer()
-	postBoday,
-
+	postBoday, err := serializerPodObject(serializer,pod)
+	if err != nil{
+		return err
+	}
+	reqCreate, err := buildPostRequest(postBoday)
+	if err != nil{
+		return err
+	}
+	client := &http.client{}
+	resp, err := client.Do(reqCreate)
+	if err != nil{
+		retunr err
+	}
+	def resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil{
+		return err
+	}
+	if resp.StatusCode <300{
+		createPod, err := deserializePodBody(serialize, body)
+		if err != nil{
+			return err
+		}
+		json, err = json.MarshalIndent(createPod,""," ")
+		if err != nil{
+			return err
+		}
+		fmt.Printf("%s\n",json)
+	}else{
+		status. err :=
+	}
 }
 
 func createPodObject() *corev1.Pod {
@@ -66,7 +95,10 @@ func buildPostRequest(body io.Reader)(*http.Request,error,){
 	)
 	return reqCreate,nil
 }
-
+func deserializePodBody(
+	serilizer runtime.Serializer,
+	body []byte,
+)(*)
 func getJSONSerializer() runtime.Serializer {
 	scheme := runtime.NewScheme()
 	scheme.AddKnownTypes(
