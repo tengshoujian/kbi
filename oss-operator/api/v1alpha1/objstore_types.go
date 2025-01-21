@@ -28,8 +28,10 @@ type ObjStoreSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of ObjStore. Edit objstore_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// Name is the name of oss bucket we want to create
+	Name string `json:"name"`
+	// Locked prevents deletion of binary objects from the bucket
+	Locked bool `json:"locked"`
 }
 
 // ObjStoreStatus defines the observed state of ObjStore
