@@ -2,10 +2,11 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
+
 	"fmt"
 	"io"
 	"net/http"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -16,37 +17,42 @@ import (
 func createPod() error {
 	pod := createPodObject()
 	serializer := getJSONSerializer()
-	postBoday, err := serializerPodObject(serializer,pod)
-	if err != nil{
+	postBoday, err := serializePodObject(serializer, pod)
+	if err != nil {
 		return err
 	}
 	reqCreate, err := buildPostRequest(postBoday)
-	if err != nil{
+	if err != nil {
 		return err
 	}
-	client := &http.client{}
+	client := &http.Client{}
 	resp, err := client.Do(reqCreate)
-	if err != nil{
-		retunr err
-	}
-	def resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
-	if err != nil{
+	if err != nil {
 		return err
 	}
-	if resp.StatusCode <300{
-		createPod, err := deserializePodBody(serialize, body)
-		if err != nil{
-			return err
-		}
-		json, err = json.MarshalIndent(createPod,""," ")
-		if err != nil{
-			return err
-		}
-		fmt.Printf("%s\n",json)
-	}else{
-		status. err :=
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
 	}
+	if resp.StatusCode < 300 {
+		createPod, err := deserializePodBody(serialize, body)
+		if err != nil {
+			return err
+		}
+		json, err = json.MarshalIndent(createPod, "", " ")
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\n", json)
+	} else {
+		status, err := deserializeStatusBody(serializer, body)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\n", json)
+	}
+	return nil
 }
 
 func createPodObject() *corev1.Pod {
@@ -67,17 +73,17 @@ func createPodObject() *corev1.Pod {
 	})
 	return &pod
 }
-func serializePodObject(serializer runtime.Serializer, pod *corev1.Pod,)(io.Reader,error){
+func serializePodObject(serializer runtime.Serializer, pod *corev1.Pod) (io.Reader, error) {
 	var buf bytes.Buffer
-	err := serializer.Encode(pod,&buf)
+	err := serializer.Encode(pod, &buf)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	return &buf, nil
 }
 
-func buildPostRequest(body io.Reader)(*http.Request,error,){
-	reqCreate, err :=http.NewRequest(
+func buildPostRequest(body io.Reader) (*http.Request, error) {
+	reqCreate, err := http.NewRequest(
 		"POST",
 		"http://172.0.0.1:8001/api/v1/namespaces/default/pods",
 		body,
@@ -93,12 +99,19 @@ func buildPostRequest(body io.Reader)(*http.Request,error,){
 		"Content-Type",
 		"application/json",
 	)
-	return reqCreate,nil
+	return reqCreate, nil
 }
 func deserializePodBody(
-	serilizer runtime.Serializer,
+	serializer runtime.Serializer,
 	body []byte,
-)(*)
+) (*metav1.Status, error) {
+	var status metav1.Status
+	_, _, err := serializer.Decode(body, nil, &status)
+	if err != nil {
+		return nil, err
+	}
+	return &status, nil
+}
 func getJSONSerializer() runtime.Serializer {
 	scheme := runtime.NewScheme()
 	scheme.AddKnownTypes(
