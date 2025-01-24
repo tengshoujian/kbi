@@ -64,7 +64,10 @@ func (r *ObjStoreReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	//如果state 为空，则辅助为pending
 	if instance.Status.State == "" {
 		instance.Status.State = cninfossv1alpha1.PENDING_STATE
-		r.Status().Update(ctx, instance)
+		err := r.Status().Update(ctx, instance)
+		if err != nil{
+			return ctrl.Result{}, client.IgnoreNotFound(err)
+			}
 	}
 
 	return ctrl.Result{}, nil
