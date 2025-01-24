@@ -131,6 +131,17 @@ func (r *ObjStoreReconciler) deleteResources(ctx context.Context, objStore *cnin
 	if err != nil {
 		return err
 	}
-
 	//删除configmap
+	configmap := &v1.ConfigMap{}
+	err = r.Get(ctx,client, client.ObjectKey{
+		Name: fmt.Sprintf(configMapname, objStore.Name),
+		Namespace: objStore.Namespace,},configmap)
+	if err != nil{
+		return err
+		}
+	err = r.Delete(ctx, configmap)
+	if err != nil{
+		return err
+		}
+	return nil
 }
